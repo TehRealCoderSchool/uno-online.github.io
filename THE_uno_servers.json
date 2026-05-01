@@ -1,0 +1,16 @@
+{
+    "note": "If you are not a developer and you are reading this, for one, how did you get access, and two, get out hacker.",
+    "title": "Uno but all the versions on one website",
+    "servers": [
+        {
+            "code": 42808,
+            "players": [],
+            "middleCard": {
+                "color": "red",
+                "symbol": "3"
+            },
+            "nextPlayerId": 0,
+            "whoseTurnIsIt": 0
+        }
+    ]
+}
