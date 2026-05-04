@@ -1,5 +1,6 @@
-
 <html>
+
+
 
 
 <head>
@@ -7,6 +8,8 @@
        .deck>*+* {
            margin-left: -50px;
        }
+
+
 
 
        .card {
@@ -27,9 +30,13 @@
        }
 
 
+
+
        [data-cardType="player"]:hover {
            top: -70px;
        }
+
+
 
 
        [data-color="yellow"] {
@@ -37,9 +44,13 @@
        }
 
 
+
+
        [data-color="red"] {
            background-color: rgba(204, 46, 61);
        }
+
+
 
 
        [data-color="green"] {
@@ -47,9 +58,13 @@
        }
 
 
+
+
        [data-color="blue"] {
            background-color: rgba(5, 94, 172);
        }
+
+
 
 
        [data-color="black"] {
@@ -61,9 +76,12 @@
 </head>
 
 
+
+
 <body>
    <script>
-       const serverUrl = "https://raw.githubusercontent.com/TehRealCoderSchool/Uno-is-cool/refs/heads/main/TheUnoServers.json"
+       const serverUrl = "https://api.jsonbin.io/v3/b/69f4e65e36566621a8141cde"
+       const apiKey = '$2a$10$OkDoUd/.vsMkr43XP8QLf.iOdUqFkvfHMZ.71CR3Gh9mbThdxiK.y'
        const colors = ["red", "green", "blue", "yellow"]
        const cardTypes = {
            colorCards: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
@@ -87,11 +105,20 @@
        async function updateResource(url, updateFunc) {
            try {
                // 1. GET the current data
-               const getResponse = await fetch(url);
+               const getResponse = await fetch(url, {
+                   headers: {
+                       'Content-Type': 'application/json',
+                       'X-Master-Key': apiKey
+                   }
+               });
                if (!getResponse.ok) throw new Error('GET failed');
 
 
+
+
                const oldData = await getResponse.json();
+
+
 
 
                // 2. Modify the data as needed
@@ -102,13 +129,18 @@
                const putResponse = await fetch(url, {
                    method: 'PUT',
                    headers: {
-                       'Content-Type': 'application/json'
+                       'Content-Type': 'application/json',
+                       'X-Master-Key': apiKey
                    },
                    body: JSON.stringify(newData)
                });
 
 
+
+
                if (!putResponse.ok) throw new Error('PUT failed');
+
+
 
 
                const result = await putResponse.json();
@@ -153,7 +185,7 @@
            }
            return startingCards
        }
-       function updateCards(data, code, id){
+       function updateCards(data, code, id) {
            let lobbyInd = getLobbyIndex(data, code)
            let playerInd = getPlayerIndex(data, code, id)
            let playerData = data.servers[lobbyInd].players[playerInd]
@@ -162,7 +194,9 @@
            let newDeck = []
 
 
-           for (let i = 0; i < playerData.cards.length; i++){
+
+
+           for (let i = 0; i < playerData.cards.length; i++) {
                let newCard = middleCard.cloneNode(false)
                newCard.dataset.color = playerData.cards[i].color
                newCard.dataset.symbol = playerData.cards[i].symbol
@@ -176,7 +210,8 @@
        async function addPlayer() {
            const codeInput = document.getElementById("codeInp").value
            const playerNameInput = document.getElementById("playerNameInp").value
-           await updateResource(serverUrl, data => {
+           await updateResource(serverUrl, rawData => {
+               const data = rawData.record
                const lobbyIndex = getLobbyIndex(data, parseInt(codeInput))
                let editData = data
                if (lobbyIndex != -1) {
@@ -184,12 +219,15 @@
                    playerId = editData.servers[lobbyIndex].nextPlayerId
 
 
+
+
                    editData.servers[lobbyIndex].players.push({
                        "id": playerId,
                        "name": playerNameInput,
                        "cards": generateStartingCardData()
                    })
-                  
+
+
                    updateCards(editData, lobbyCode, playerId)
                }
                return editData
@@ -213,11 +251,12 @@
                src='https://i.ibb.co/j9ZGhZwg/Screenshot-2026-04-10-1-42-31-PM-removebg-preview.png' width='90'
                style='position: relative; top:-6px; left: -4px;'></img></button>
    </div>
-   <button class="card" data-color="red" data-cardType="middle" data-symbol="3" data-index="-1" id="middleCard">3</button>
+   <button class="card" data-color="red" data-cardType="middle" data-symbol="3" data-index="-1"
+       id="middleCard">3</button>
 </body>
 
 
+
+
 </html>
-
-
 
