@@ -103,6 +103,7 @@
        }
        let playerId = -1
        let lobbyCode = -1
+       let isYourTurn = false
        let playableCards = []
        async function updateResource(url, updateFunc) {
            try {
@@ -186,6 +187,23 @@
            }
            return startingCards
        }
+       async function placeCard(code, id, index){
+           if (playableCards.includes(index) && isYourTurn){
+               await updateResource(serverUrl, rawData => {
+                   const data = rawData.record
+                   const lobbyInd = getLobbyIndex(data, lobbyCode)
+                   const playerInd = getPlayerIndex(data, lobbyCode, playerId)
+                   const playerData = data.servers[lobbyInd].players[playerInd]
+                   let editData = data
+
+                   editData.servers[lobbyInd].players[playerInd].cards.splice(index, 1)
+                   editData.servers[lobbyInd].middleCard = playerData.cards[index]
+
+                   editData.servers[lobbyInd].whoseTurnIsIt++
+                   editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length
+               })
+           }
+       }
        function updateCards(data, code, id) {
            let lobbyInd = getLobbyIndex(data, code)
            let playerInd = getPlayerIndex(data, code, id)
@@ -194,9 +212,9 @@
            let middleCard = document.getElementById("middleCard")
            let newDeck = []
 
+           isYourTurn = (data.servers[lobbyInd].whoseTurnIsIt == playerInd)
 
-
-
+           playableCards = []
            for (let i = 0; i < playerData.cards.length; i++) {
                let newCard = middleCard.cloneNode(false)
                newCard.dataset.color = playerData.cards[i].color
@@ -205,9 +223,16 @@
                newCard.dataset.cardType = "player"
                newCard.dataset.index = i
                newDeck.push(newCard)
+               if (newCard.dataset.color == data.servers[lobbyInd].middleCard.color || newCard.dataset.color == "black" || newCard.dataset.symbol == data.servers[lobbyInd].middleCard.symbol){
+                   playableCards.push(i)
+               }
+              newCard.onclick = "placeCard()"
            }
            deck.replaceChildren(...newDeck)
-           
+
+           middleCard.dataset.color = data.servers[lobbyInd].middleCard.color
+           middleCard.dataset.symbol = data.servers[lobbyInd].middleCard.symbol
+           middleCard.innerHTML = cardDisplays[data.servers[lobbyInd].middleCard.symbol]
        }
        async function addPlayer() {
            const codeInput = document.getElementById("codeInp").value
