@@ -259,23 +259,23 @@
            })
        }
 
-       window.addEventListener('beforeunload', async (event) => {
-        event.preventDefault();
-        try {
-           await updateResource(serverUrl, rawData => {
-              const data = rawData.record
-              const playerIndex = getPlayerIndex(data, lobbyCode, playerId)
-              let editData = data
-              if (playerIndex != -1){
-                 const lobbyInd = getLobbyIndex(data, lobbyCode)
-                 editData.servers[lobbyInd].players.splice(playerIndex, 1)
-              }
-           }) 
-        } catch (error) {
-           console.error(error);
-        }
-        event.returnValue = ''; 
-      });
+      //  window.addEventListener('beforeunload', async (event) => {
+      //   event.preventDefault();
+      //   try {
+      //      await updateResource(serverUrl, rawData => {
+      //         const data = rawData.record
+      //         const playerIndex = getPlayerIndex(data, lobbyCode, playerId)
+      //         let editData = data
+      //         if (playerIndex != -1){
+      //            const lobbyInd = getLobbyIndex(data, lobbyCode)
+      //            editData.servers[lobbyInd].players.splice(playerIndex, 1)
+      //         }
+      //      }) 
+      //   } catch (error) {
+      //      console.error(error);
+      //   }
+      //   event.returnValue = ''; 
+      // });
 
    </script>
    <input id="codeInp" placeholder="Enter lobby code here"></input>
