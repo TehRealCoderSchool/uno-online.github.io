@@ -187,21 +187,6 @@
            }
            return startingCards
        }
-       async function placeCard(code, id, index){
-           await updateResource(serverUrl, rawData => {
-                   const data = rawData.record
-                   const lobbyInd = getLobbyIndex(data, lobbyCode)
-                   const playerInd = getPlayerIndex(data, lobbyCode, playerId)
-                   const playerData = data.servers[lobbyInd].players[playerInd]
-                   let editData = data
-
-                   editData.servers[lobbyInd].players[playerInd].cards.splice(index, 1)
-                   editData.servers[lobbyInd].middleCard = playerData.cards[index]
-
-                   editData.servers[lobbyInd].whoseTurnIsIt++
-                   editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length
-               })
-       }
        function updateCards(data, code, id) {
            let lobbyInd = getLobbyIndex(data, code)
            let playerInd = getPlayerIndex(data, code, id)
@@ -231,6 +216,23 @@
            middleCard.dataset.color = data.servers[lobbyInd].middleCard.color
            middleCard.dataset.symbol = data.servers[lobbyInd].middleCard.symbol
            middleCard.innerHTML = cardDisplays[data.servers[lobbyInd].middleCard.symbol]
+       }
+       async function placeCard(code, id, index){
+           await updateResource(serverUrl, rawData => {
+                   const data = rawData.record
+                   const lobbyInd = getLobbyIndex(data, lobbyCode)
+                   const playerInd = getPlayerIndex(data, lobbyCode, playerId)
+                   const playerData = data.servers[lobbyInd].players[playerInd]
+                   let editData = data
+
+                   editData.servers[lobbyInd].players[playerInd].cards.splice(index, 1)
+                   editData.servers[lobbyInd].middleCard = playerData.cards[index]
+
+                   editData.servers[lobbyInd].whoseTurnIsIt++
+                   editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length
+                   updateCards(editData, code, id)
+                   return editData
+           })
        }
        async function addPlayer() {
            const codeInput = document.getElementById("codeInp").value
