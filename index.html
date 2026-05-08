@@ -226,7 +226,7 @@
                if (newCard.dataset.color == data.servers[lobbyInd].middleCard.color || newCard.dataset.color == "black" || newCard.dataset.symbol == data.servers[lobbyInd].middleCard.symbol){
                    playableCards.push(i)
                }
-              newCard.onclick = "placeCard()"
+              newCard.onclick = "placeCard(lobbyCode, playerId, i)"
            }
            deck.replaceChildren(...newDeck)
 
