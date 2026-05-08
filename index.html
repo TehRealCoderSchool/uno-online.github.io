@@ -188,8 +188,7 @@
            return startingCards
        }
        async function placeCard(code, id, index){
-           if (playableCards.includes(index) && isYourTurn){
-               await updateResource(serverUrl, rawData => {
+           await updateResource(serverUrl, rawData => {
                    const data = rawData.record
                    const lobbyInd = getLobbyIndex(data, lobbyCode)
                    const playerInd = getPlayerIndex(data, lobbyCode, playerId)
@@ -202,7 +201,6 @@
                    editData.servers[lobbyInd].whoseTurnIsIt++
                    editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length
                })
-           }
        }
        function updateCards(data, code, id) {
            let lobbyInd = getLobbyIndex(data, code)
@@ -226,7 +224,7 @@
                if (newCard.dataset.color == data.servers[lobbyInd].middleCard.color || newCard.dataset.color == "black" || newCard.dataset.symbol == data.servers[lobbyInd].middleCard.symbol){
                    playableCards.push(i)
                }
-              newCard.onclick = "placeCard(lobbyCode, playerId, i)"
+              newCard.onclick = "if (playableCards.includes(index) && isYourTurn){placeCard(lobbyCode, playerId, i)}"
            }
            deck.replaceChildren(...newDeck)
 
