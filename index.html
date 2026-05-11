@@ -196,7 +196,13 @@
            let newDeck = []
 
            isYourTurn = (data.servers[lobbyInd].whoseTurnIsIt == playerInd)
-
+           
+           let newMiddleCard = middleCard.cloneNode(true)
+           newMiddleCard.dataset.color = data.servers[lobbyInd].middleCard.color
+           newMiddleCard.dataset.symbol = data.servers[lobbyInd].middleCard.symbol
+           newMiddleCard.innerHTML = cardDisplays[data.servers[lobbyInd].middleCard.symbol]
+           middleCard.replaceWith(newMiddleCard)
+         
            playableCards = []
            for (let i = 0; i < playerData.cards.length; i++) {
                let newCard = middleCard.cloneNode(false)
@@ -209,30 +215,26 @@
                if (newCard.dataset.color == data.servers[lobbyInd].middleCard.color || newCard.dataset.color == "black" || newCard.dataset.symbol == data.servers[lobbyInd].middleCard.symbol){
                    playableCards.push(i)
                }
-              newCard.onclick = "if (playableCards.includes(index) && isYourTurn){placeCard(lobbyCode, playerId, i)}"
+              newCard.setAttribute('onclick', `if (playableCards.includes(${i}) && isYourTurn){placeCard(lobbyCode, playerId, ${i})}`)
            }
            deck.replaceChildren(...newDeck)
-
-           middleCard.dataset.color = data.servers[lobbyInd].middleCard.color
-           middleCard.dataset.symbol = data.servers[lobbyInd].middleCard.symbol
-           middleCard.innerHTML = cardDisplays[data.servers[lobbyInd].middleCard.symbol]
        }
        async function placeCard(code, id, index){
+           let editData
            await updateResource(serverUrl, rawData => {
                    const data = rawData.record
                    const lobbyInd = getLobbyIndex(data, lobbyCode)
                    const playerInd = getPlayerIndex(data, lobbyCode, playerId)
                    const playerData = data.servers[lobbyInd].players[playerInd]
-                   let editData = data
+                   editData = data
 
-                   editData.servers[lobbyInd].players[playerInd].cards.splice(index, 1)
-                   editData.servers[lobbyInd].middleCard = playerData.cards[index]
+                   editData.servers[lobbyInd].middleCard = editData.servers[lobbyInd].players[playerInd].cards.splice(index, 1)[0]
 
                    editData.servers[lobbyInd].whoseTurnIsIt++
                    editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length
-                   updateCards(editData, code, id)
                    return editData
            })
+           updateCards(editData, code, id)
        }
        async function addPlayer() {
            const codeInput = document.getElementById("codeInp").value
@@ -305,4 +307,3 @@
 
 
 </html>
-
