@@ -197,15 +197,14 @@
 
            isYourTurn = (data.servers[lobbyInd].whoseTurnIsIt == playerInd)
            
-           let newMiddleCard = middleCard.cloneNode(true)
-           newMiddleCard.dataset.color = data.servers[lobbyInd].middleCard.color
-           newMiddleCard.dataset.symbol = data.servers[lobbyInd].middleCard.symbol
-           newMiddleCard.innerHTML = cardDisplays[data.servers[lobbyInd].middleCard.symbol]
-           middleCard.replaceWith(newMiddleCard)
+           middleCard.dataset.color = data.servers[lobbyInd].middleCard.color
+           middleCard.dataset.symbol = data.servers[lobbyInd].middleCard.symbol
+           middleCard.innerHTML = cardDisplays[data.servers[lobbyInd].middleCard.symbol]
          
            playableCards = []
            for (let i = 0; i < playerData.cards.length; i++) {
                let newCard = middleCard.cloneNode(false)
+               newCard.id = ""
                newCard.dataset.color = playerData.cards[i].color
                newCard.dataset.symbol = playerData.cards[i].symbol
                newCard.innerHTML = cardDisplays[playerData.cards[i].symbol]
@@ -262,7 +261,6 @@
                return editData
            })
        }
-
       //  window.addEventListener('beforeunload', async (event) => {
       //   event.preventDefault();
       //   try {
@@ -282,9 +280,11 @@
       // });
 
    </script>
-   <input id="codeInp" placeholder="Enter lobby code here"></input>
-   <input id="playerNameInp" placeholder="Enter your username here"></input>
-   <button onclick="addPlayer()">Join</button>
+   <div>
+     <input id="codeInp" placeholder="Enter lobby code here"></input>
+     <input id="playerNameInp" placeholder="Enter your username here"></input>
+     <button onclick="addPlayer()">Join</button>
+   </div>
    <div class="deck" id="playerDeck">
        <button class="card" data-color="yellow" data-cardType="player" data-symbol="9" data-index="0">9</button>
        <button class="card" data-color="green" data-cardType="player" data-symbol="8" data-index="0">8</button>
