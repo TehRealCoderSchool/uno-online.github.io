@@ -80,6 +80,29 @@
 
 
 <body>
+   <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7S-SxBRxDtWMx5suohh3XHdBrpE0U0Js",
+    authDomain: "uno-online-47ce0.firebaseapp.com",
+    projectId: "uno-online-47ce0",
+    storageBucket: "uno-online-47ce0.firebasestorage.app",
+    messagingSenderId: "521598018162",
+    appId: "1:521598018162:web:ad4e96c43ddde8768558eb",
+    measurementId: "G-FGKNG0H1VQ"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
    <script>
        const serverUrl = "https://api.jsonbin.io/v3/b/69f4e65e36566621a8141cde"
        const apiKey = '$2a$10$OkDoUd/.vsMkr43XP8QLf.iOdUqFkvfHMZ.71CR3Gh9mbThdxiK.y'
