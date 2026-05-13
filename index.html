@@ -271,6 +271,7 @@ setInterval(async () => {
     });
     const data = await response.json();
     // Only update if we are actually in a game
+    console.log(data);
     if (lobbyCode !== -1) {
         updateCards(data.record, lobbyCode, playerId);
     }
