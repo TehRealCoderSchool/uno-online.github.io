@@ -30,7 +30,14 @@
            color: white;
            transition: top 0.5s ease-out, 0.3s;
        }
-
+       .backCard {
+          background-image: url("https://i.ibb.co/pBLbBZhB/Screenshot-2026-05-13-at-6-19-30-PM.png")
+          background-size: cover;
+           width: 100px;
+           height: 150px;
+           border-radius: 28px;
+           border: 2px solid black;
+       }
 
 
 
@@ -69,9 +76,8 @@
 
 
 
-       [data-color="black"] {
+       [data-symbol="wild"] {
            background-color: rgba(30, 28, 29);
-           font-size: 20px;
            top: 63px;
        }
    </style>
@@ -173,7 +179,7 @@
        function generateStartingCardData() {
            let startingCards = []
            for (let i = 0; i < 7; i++) {
-               if (Math.random() >= .5) {
+               if (Math.random() >= .762) {
                    startingCards.push({
                        color: colors[Math.floor(Math.random() * colors.length)],
                        symbol: cardTypes.colorCards[Math.floor(Math.random() * cardTypes.colorCards.length)]
@@ -270,7 +276,33 @@ async function placeCard(code, id, index) {
                return editData
            })
        }
-      // Replace the channel.bind logic with this "Polling" logic:
+      async function pickupCard(code, id, howMany){
+         await updateResource(serverUrl, rawData => {
+            const data = rawData.record;
+            const lobbyInd = getLobbyIndex(data, lobbyCode);
+            const playerInd = getPlayerIndex(data, lobbyCode, playerId);
+        
+            if (lobbyInd === -1 || playerInd === -1) return data;
+
+            let editData = data;
+
+           for (let i = 0; i < howMany; i++) {
+               if (Math.random() >= .762) {
+                   editData.servers[lobbyInd].players[playerInd].cards.push({
+                       color: colors[Math.floor(Math.random() * colors.length)],
+                       symbol: cardTypes.colorCards[Math.floor(Math.random() * cardTypes.colorCards.length)]
+                   })
+               } else {
+                   editData.servers[lobbyInd].players[playerInd].cards.push({
+                       color: "black",
+                       symbol: cardTypes.wildCards[Math.floor(Math.random() * cardTypes.wildCards.length)]
+                   })
+               }
+           }
+            
+            return editData;
+         })
+      }
 setInterval(async () => {
     const response = await fetch(serverUrl, {
         headers: { 'X-Master-Key': apiKey }
@@ -330,6 +362,7 @@ setInterval(async () => {
    </div>
    <button class="card" data-color="red" data-cardType="middle" data-symbol="3" data-index="-1"
        id="middleCard">3</button>
+   <button class="backCard" onclick="if (isYourTurn){pickupCard(lobbyCode, playerId, 1)}"></button>
    </div>
 </body>
 
