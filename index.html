@@ -230,30 +230,41 @@ const channel = pusher.subscribe('private-my-channel');
            }
            deck.replaceChildren(...newDeck)
        }
-       channel.bind('client-my-event', (data) => {
-  console.log('Event received:', data);
-          if (getPlayerIndex(lobbyCode, playerId) != -1){
-               updateCards(data, lobbyCode, playerId)
-          }
-          
+       // ... (Existing styles and Pusher init)
+
+channel.bind('client-my-event', (data) => {
+    console.log('Event received:', data);
+    // JSONBin usually wraps the response in a 'record' object
+    const incomingData = data.record ? data.record : data;
+    
+    // Only update if this client is actually in a lobby
+    if (lobbyCode !== -1) {
+        updateCards(incomingData, lobbyCode, playerId);
+    }
 });
-       async function placeCard(code, id, index){
-           let editData
-           await updateResource(serverUrl, rawData => {
-                   const data = rawData.record
-                   const lobbyInd = getLobbyIndex(data, lobbyCode)
-                   const playerInd = getPlayerIndex(data, lobbyCode, playerId)
-                   const playerData = data.servers[lobbyInd].players[playerInd]
-                   editData = data
 
-                   editData.servers[lobbyInd].middleCard = editData.servers[lobbyInd].players[playerInd].cards.splice(index, 1)[0]
+async function placeCard(code, id, index) {
+    await updateResource(serverUrl, rawData => {
+        const data = rawData.record;
+        const lobbyInd = getLobbyIndex(data, lobbyCode);
+        const playerInd = getPlayerIndex(data, lobbyCode, playerId);
+        
+        if (lobbyInd === -1 || playerInd === -1) return data;
 
-                   editData.servers[lobbyInd].whoseTurnIsIt++
-                   editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length
-                   return editData
-           })
-           updateCards(editData, code, id)
-       }
+        let editData = data;
+        // Move the card to the middle
+        const playedCard = editData.servers[lobbyInd].players[playerInd].cards.splice(index, 1)[0];
+        editData.servers[lobbyInd].middleCard = playedCard;
+
+        // Cycle turn
+        editData.servers[lobbyInd].whoseTurnIsIt++;
+        editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
+        
+        return editData;
+    });
+    // Note: updateCards will be called automatically for everyone via the Pusher event trigger
+    // inside the updateResource function.
+}
        async function addPlayer() {
            const codeInput = document.getElementById("codeInp").value
            const playerNameInput = document.getElementById("playerNameInp").value
