@@ -80,30 +80,17 @@
 
 
 <body>
-   <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyC7S-SxBRxDtWMx5suohh3XHdBrpE0U0Js",
-    authDomain: "uno-online-47ce0.firebaseapp.com",
-    projectId: "uno-online-47ce0",
-    storageBucket: "uno-online-47ce0.firebasestorage.app",
-    messagingSenderId: "521598018162",
-    appId: "1:521598018162:web:ad4e96c43ddde8768558eb",
-    measurementId: "G-FGKNG0H1VQ"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
+   <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
    <script>
+       // Initialize Pusher
+const pusher = new Pusher('98e630faaf3a2dfe8052', {
+  cluster: 'us2',
+  authEndpoint: '/pusher/auth' // Required for private/presence channels
+});
+
+// Subscribe to a private channel
+const channel = pusher.subscribe('private-my-channel');
+       
        const serverUrl = "https://api.jsonbin.io/v3/b/69f4e65e36566621a8141cde"
        const apiKey = '$2a$10$OkDoUd/.vsMkr43XP8QLf.iOdUqFkvfHMZ.71CR3Gh9mbThdxiK.y'
        const colors = ["red", "green", "blue", "yellow"]
@@ -169,7 +156,9 @@
 
                const result = await putResponse.json();
                console.log('Resource updated successfully:', result);
-              
+               const triggered = channel.trigger('client-my-event', newData);
+  
+               console.log('Event triggered successfully:', triggered);
            } catch (error) {
                console.error('Error:', error);
            }
@@ -241,6 +230,13 @@
            }
            deck.replaceChildren(...newDeck)
        }
+       channel.bind('client-my-event', (data) => {
+  console.log('Event received:', data);
+          if (getPlayerIndex(lobbyCode, playerId) != -1){
+               updateCards(data, lobbyCode, playerId)
+          }
+          
+});
        async function placeCard(code, id, index){
            let editData
            await updateResource(serverUrl, rawData => {
