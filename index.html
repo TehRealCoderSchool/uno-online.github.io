@@ -84,12 +84,11 @@
    <script>
        // Initialize Pusher
 const pusher = new Pusher('98e630faaf3a2dfe8052', {
-  cluster: 'us2',
-  authEndpoint: '/pusher/auth' // Required for private/presence channels
+  cluster: 'us2'
 });
 
 // Subscribe to a private channel
-const channel = pusher.subscribe('private-my-channel');
+const channel = pusher.subscribe('my-channel');
        
        const serverUrl = "https://api.jsonbin.io/v3/b/69f4e65e36566621a8141cde"
        const apiKey = '$2a$10$OkDoUd/.vsMkr43XP8QLf.iOdUqFkvfHMZ.71CR3Gh9mbThdxiK.y'
@@ -230,16 +229,18 @@ const channel = pusher.subscribe('private-my-channel');
            }
            deck.replaceChildren(...newDeck)
        }
-       // ... (Existing styles and Pusher init)
-
-channel.bind('client-my-event', (data) => {
-    console.log('Event received:', data);
-    // JSONBin usually wraps the response in a 'record' object
-    const incomingData = data.record ? data.record : data;
+       channel.bind('client-my-event', (eventData) => {
+    console.log('Event received:', eventData);
     
-    // Only update if this client is actually in a lobby
-    if (lobbyCode !== -1) {
-        updateCards(incomingData, lobbyCode, playerId);
+    // JSONBin returns the data inside a .record property
+    const data = eventData.record ? eventData.record : eventData;
+
+    // Use the lobbyCode we stored globally to find the right server
+    const lobbyInd = getLobbyIndex(data, lobbyCode);
+    
+    if (lobbyInd !== -1) {
+        // Refresh the UI with the new data from the other player
+        updateCards(data, lobbyCode, playerId);
     }
 });
 
