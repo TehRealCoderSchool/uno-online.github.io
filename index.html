@@ -80,16 +80,7 @@
 
 
 <body>
-   <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
    <script>
-       // Initialize Pusher
-const pusher = new Pusher('98e630faaf3a2dfe8052', {
-  cluster: 'us2'
-});
-
-// Subscribe to a private channel
-const channel = pusher.subscribe('my-channel');
-       
        const serverUrl = "https://api.jsonbin.io/v3/b/69f4e65e36566621a8141cde"
        const apiKey = '$2a$10$OkDoUd/.vsMkr43XP8QLf.iOdUqFkvfHMZ.71CR3Gh9mbThdxiK.y'
        const colors = ["red", "green", "blue", "yellow"]
@@ -155,9 +146,6 @@ const channel = pusher.subscribe('my-channel');
 
                const result = await putResponse.json();
                console.log('Resource updated successfully:', result);
-               const triggered = channel.trigger('client-my-event', newData);
-  
-               console.log('Event triggered successfully:', triggered);
            } catch (error) {
                console.error('Error:', error);
            }
@@ -229,20 +217,6 @@ const channel = pusher.subscribe('my-channel');
            }
            deck.replaceChildren(...newDeck)
        }
-       channel.bind('client-my-event', (eventData) => {
-    console.log('Event received:', eventData);
-    
-    // JSONBin returns the data inside a .record property
-    const data = eventData.record ? eventData.record : eventData;
-
-    // Use the lobbyCode we stored globally to find the right server
-    const lobbyInd = getLobbyIndex(data, lobbyCode);
-    
-    if (lobbyInd !== -1) {
-        // Refresh the UI with the new data from the other player
-        updateCards(data, lobbyCode, playerId);
-    }
-});
 
 async function placeCard(code, id, index) {
     await updateResource(serverUrl, rawData => {
@@ -263,8 +237,6 @@ async function placeCard(code, id, index) {
         
         return editData;
     });
-    // Note: updateCards will be called automatically for everyone via the Pusher event trigger
-    // inside the updateResource function.
 }
        async function addPlayer() {
            const codeInput = document.getElementById("codeInp").value
@@ -292,6 +264,17 @@ async function placeCard(code, id, index) {
                return editData
            })
        }
+      // Replace the channel.bind logic with this "Polling" logic:
+setInterval(async () => {
+    const response = await fetch(serverUrl, {
+        headers: { 'X-Master-Key': apiKey }
+    });
+    const data = await response.json();
+    // Only update if we are actually in a game
+    if (lobbyCode !== -1) {
+        updateCards(data.record, lobbyCode, playerId);
+    }
+}, 3000); // Checks every 3 seconds
       //  window.addEventListener('beforeunload', async (event) => {
       //   event.preventDefault();
       //   try {
