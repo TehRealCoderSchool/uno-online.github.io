@@ -230,12 +230,17 @@ async function placeCard(code, id, index) {
         let editData = data;
         // Move the card to the middle
         const playedCard = editData.servers[lobbyInd].players[playerInd].cards.splice(index, 1)[0];
+        if (playedCard.color == "black"){
+           playedCard.color = document.getElementById("wildCardColor").value
+        }
         editData.servers[lobbyInd].middleCard = playedCard;
 
         // Cycle turn
         editData.servers[lobbyInd].whoseTurnIsIt++;
         editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
-        
+
+        updateCards(editData, code, id)
+       
         return editData;
     });
 }
@@ -296,12 +301,20 @@ setInterval(async () => {
       // });
 
    </script>
-   <div>
+   <div id="lobbyActions">
      <input id="codeInp" placeholder="Enter lobby code here"></input>
      <input id="playerNameInp" placeholder="Enter your username here"></input>
      <button onclick="addPlayer()">Join</button>
    </div>
-   <div class="deck" id="playerDeck">
+   <div id="ingame">
+      <label for="wildCardColor">What should the color for the wild card be?</label>
+      <select id="wildCardColor" selected="red">
+         <option value="red">Red</option>
+         <option value="blue">Blue</option>
+         <option value="yellow">Yellow</option>
+         <option value="green">Green</option>
+      </select>
+      <div class="deck" id="playerDeck">
        <button class="card" data-color="yellow" data-cardType="player" data-symbol="9" data-index="0">9</button>
        <button class="card" data-color="green" data-cardType="player" data-symbol="8" data-index="0">8</button>
        <button class="card" data-color="green" data-cardType="player" data-symbol="9" data-index="0">9</button>
@@ -317,6 +330,7 @@ setInterval(async () => {
    </div>
    <button class="card" data-color="red" data-cardType="middle" data-symbol="3" data-index="-1"
        id="middleCard">3</button>
+   </div>
 </body>
 
 
