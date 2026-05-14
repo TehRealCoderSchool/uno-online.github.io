@@ -304,11 +304,11 @@ async function placeCard(code, id, index) {
 
         if (playedCard.symbol[0] == "+"){
            if (editData.servers[lobbyInd].reverse){
-              editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[playerInd].id, parseInt(playedCard.symbol.substring(1)))
-              editData.servers[lobbyInd].whoseTurnIsIt++;
-           } else {
-              editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[playerInd].id, parseInt(playedCard.symbol.substring(1)))
               editData.servers[lobbyInd].whoseTurnIsIt--;
+              editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[playerInd].id, parseInt(playedCard.symbol.substring(1)))
+           } else {
+              editData.servers[lobbyInd].whoseTurnIsIt++;
+              editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[playerInd].id, parseInt(playedCard.symbol.substring(1)))
            }
            editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
         }
@@ -340,9 +340,9 @@ async function placeCard(code, id, index) {
                    editData.servers[lobbyIndex].nextPlayerId++
 
                    joinButton.innerHTML = "Lobby found"
-                   setTimeout(() => {joinButton.innerHTML = "In game"}, 2000)
+                   setTimeout(() => {document.getElementById("ingame").style.display = "block";document.getElementById("lobbyActions").style.display = "none"}, 2000)
 
-                   document.getElementById("ingame").style.display = "block"
+      
 
                    editData.servers[lobbyIndex].players.push({
                        "id": playerId,
