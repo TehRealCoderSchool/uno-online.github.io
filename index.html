@@ -304,10 +304,10 @@ async function placeCard(code, id, index) {
 
         if (playedCard.symbol[0] == "+"){
            if (editData.servers[lobbyInd].reverse){
-              editData.servers[lobbyInd].whoseTurnIsIt--;
+              editData.servers[lobbyInd].whoseTurnIsIt++;
               editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[playerInd].id, parseInt(playedCard.symbol.substring(1)))
            } else {
-              editData.servers[lobbyInd].whoseTurnIsIt++;
+              editData.servers[lobbyInd].whoseTurnIsIt--;
               editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[playerInd].id, parseInt(playedCard.symbol.substring(1)))
            }
            editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
