@@ -183,7 +183,7 @@
        function generateStartingCardData() {
            let startingCards = []
            for (let i = 0; i < 7; i++) {
-               if (Math.random() >= .762) {
+               if (Math.random() <= .762) {
                    startingCards.push({
                        color: colors[Math.floor(Math.random() * colors.length)],
                        symbol: cardTypes.colorCards[Math.floor(Math.random() * cardTypes.colorCards.length)]
