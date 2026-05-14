@@ -94,8 +94,8 @@
        const apiKey = '$2a$10$OkDoUd/.vsMkr43XP8QLf.iOdUqFkvfHMZ.71CR3Gh9mbThdxiK.y'
        const colors = ["red", "green", "blue", "yellow"]
        const cardTypes = {
-           colorCards: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
-           wildCards: ["wild"]
+           colorCards: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "+2"],
+           wildCards: ["wild", "+4"]
        }
        const cardDisplays = {
            "0": "0",
@@ -108,7 +108,9 @@
            "7": "7",
            "8": "8",
            "9": "9",
+           "+2": "+2"
            "wild": "<img src='https://i.ibb.co/j9ZGhZwg/Screenshot-2026-04-10-1-42-31-PM-removebg-preview.png' width='90' style='position: relative; top:-6px; left: -4px;'></img>"
+           "+4": "<img src='https://i.ibb.co/j9ZGhZwg/Screenshot-2026-04-10-1-42-31-PM-removebg-preview.png' width='90' style='position: relative; top:-6px; left: -4px;'></img>+4"
        }
        let playerId = -1
        let lobbyCode = -1
@@ -226,7 +228,64 @@
            }
            deck.replaceChildren(...newDeck)
        }
+      function pickupCardData(data, code, id, howMany){
+         const lobbyInd = getLobbyIndex(data, lobbyCode);
+            const playerInd = getPlayerIndex(data, lobbyCode, playerId);
+        
+            if (lobbyInd === -1 || playerInd === -1) return data;
 
+            let editData = data;
+
+           for (let i = 0; i < howMany; i++) {
+               if (Math.random() >= .762) {
+                   editData.servers[lobbyInd].players[playerInd].cards.push({
+                       color: colors[Math.floor(Math.random() * colors.length)],
+                       symbol: cardTypes.colorCards[Math.floor(Math.random() * cardTypes.colorCards.length)]
+                   })
+               } else {
+                   editData.servers[lobbyInd].players[playerInd].cards.push({
+                       color: "black",
+                       symbol: cardTypes.wildCards[Math.floor(Math.random() * cardTypes.wildCards.length)]
+                   })
+               }
+           }
+            
+            return editData;
+      }
+async function pickupCard(code, id, howMany){
+         await updateResource(serverUrl, rawData => {
+            const data = rawData.record;
+            const lobbyInd = getLobbyIndex(data, lobbyCode);
+            const playerInd = getPlayerIndex(data, lobbyCode, playerId);
+        
+            if (lobbyInd === -1 || playerInd === -1) return data;
+
+            let editData = data;
+
+           for (let i = 0; i < howMany; i++) {
+               if (Math.random() >= .762) {
+                   editData.servers[lobbyInd].players[playerInd].cards.push({
+                       color: colors[Math.floor(Math.random() * colors.length)],
+                       symbol: cardTypes.colorCards[Math.floor(Math.random() * cardTypes.colorCards.length)]
+                   })
+               } else {
+                   editData.servers[lobbyInd].players[playerInd].cards.push({
+                       color: "black",
+                       symbol: cardTypes.wildCards[Math.floor(Math.random() * cardTypes.wildCards.length)]
+                   })
+               }
+           }
+
+            if (editData.servers[lobbyInd].reverse){
+           editData.servers[lobbyInd].whoseTurnIsIt--;
+        } else {
+           editData.servers[lobbyInd].whoseTurnIsIt++;
+        }
+        editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
+            
+            return editData;
+         })
+      }
 async function placeCard(code, id, index) {
     await updateResource(serverUrl, rawData => {
         const data = rawData.record;
@@ -243,8 +302,22 @@ async function placeCard(code, id, index) {
         }
         editData.servers[lobbyInd].middleCard = playedCard;
 
+        if (playedCard.symbol[0] == "+"){
+           if (editData.servers[lobbyInd].reverse){
+              editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[(playerInd - 1) % editData.servers[lobbyInd].players.length].id, parseInt(playedCard.symbol.substring(1)))
+              editData.servers[lobbyInd].whoseTurnIsIt--;
+           } else {
+              editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[(playerInd + 1) % editData.servers[lobbyInd].players.length].id, parseInt(playedCard.symbol.substring(1)))
+              editData.servers[lobbyInd].whoseTurnIsIt++;
+           }
+           editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
+        }
         // Cycle turn
-        editData.servers[lobbyInd].whoseTurnIsIt++;
+        if (editData.servers[lobbyInd].reverse){
+           editData.servers[lobbyInd].whoseTurnIsIt--;
+        } else {
+           editData.servers[lobbyInd].whoseTurnIsIt++;
+        }
         editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
 
         updateCards(editData, code, id)
@@ -278,33 +351,6 @@ async function placeCard(code, id, index) {
                return editData
            })
        }
-      async function pickupCard(code, id, howMany){
-         await updateResource(serverUrl, rawData => {
-            const data = rawData.record;
-            const lobbyInd = getLobbyIndex(data, lobbyCode);
-            const playerInd = getPlayerIndex(data, lobbyCode, playerId);
-        
-            if (lobbyInd === -1 || playerInd === -1) return data;
-
-            let editData = data;
-
-           for (let i = 0; i < howMany; i++) {
-               if (Math.random() >= .762) {
-                   editData.servers[lobbyInd].players[playerInd].cards.push({
-                       color: colors[Math.floor(Math.random() * colors.length)],
-                       symbol: cardTypes.colorCards[Math.floor(Math.random() * cardTypes.colorCards.length)]
-                   })
-               } else {
-                   editData.servers[lobbyInd].players[playerInd].cards.push({
-                       color: "black",
-                       symbol: cardTypes.wildCards[Math.floor(Math.random() * cardTypes.wildCards.length)]
-                   })
-               }
-           }
-            
-            return editData;
-         })
-      }
 setInterval(async () => {
     const response = await fetch(serverUrl, {
         headers: { 'X-Master-Key': apiKey }
