@@ -203,6 +203,7 @@
            let playerData = data.servers[lobbyInd].players[playerInd]
            let deck = document.getElementById("playerDeck")
            let middleCard = document.getElementById("middleCard")
+           let dialog = document.getElementById("dialog")
            let newDeck = []
 
            isYourTurn = (data.servers[lobbyInd].whoseTurnIsIt == playerInd)
@@ -227,6 +228,7 @@
               newCard.setAttribute('onclick', `if (playableCards.includes(${i}) && isYourTurn){placeCard(lobbyCode, playerId, ${i})}`)
            }
            deck.replaceChildren(...newDeck)
+           dialog.innerHTML = "It is " + data.servers[lobbyInd].players[data.servers[lobbyInd].whoseTurnIsIt].name + " turn."
        }
       function pickupCardData(data, code, id, howMany){
          const lobbyInd = getLobbyIndex(data, lobbyCode);
@@ -419,6 +421,7 @@ setInterval(async () => {
    <button class="card" data-color="red" data-cardType="middle" data-symbol="3" data-index="-1"
        id="middleCard">3</button>
    <button class="backCard" onclick="if (isYourTurn){pickupCard(lobbyCode, playerId, 1)}"></button>
+   <dialog open id="dialog">It is ? turn.</dialog>
    </div>
 </body>
 
