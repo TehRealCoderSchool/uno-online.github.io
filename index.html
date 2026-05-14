@@ -231,8 +231,8 @@
            dialog.innerHTML = "It is " + data.servers[lobbyInd].players[data.servers[lobbyInd].whoseTurnIsIt].name + " turn."
        }
       function pickupCardData(data, code, id, howMany){
-         const lobbyInd = getLobbyIndex(data, lobbyCode);
-            const playerInd = getPlayerIndex(data, lobbyCode, playerId);
+         const lobbyInd = getLobbyIndex(data, code);
+            const playerInd = getPlayerIndex(data, code, id);
         
             if (lobbyInd === -1 || playerInd === -1) return data;
 
