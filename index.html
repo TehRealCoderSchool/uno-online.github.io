@@ -328,6 +328,8 @@ async function placeCard(code, id, index) {
        async function addPlayer() {
            const codeInput = document.getElementById("codeInp").value
            const playerNameInput = document.getElementById("playerNameInp").value
+           const joinButton = document.getElementById("joinButton")
+           joinButton.innerHTML = "Finding lobby..."
            await updateResource(serverUrl, rawData => {
                const data = rawData.record
                const lobbyIndex = getLobbyIndex(data, parseInt(codeInput))
@@ -337,7 +339,10 @@ async function placeCard(code, id, index) {
                    playerId = editData.servers[lobbyIndex].nextPlayerId
                    editData.servers[lobbyIndex].nextPlayerId++
 
+                   joinButton.innerHTML = "Lobby found"
+                   setTimeout(() => {joinButton.innerHTML = "In game"}, 2000)
 
+                   document.getElementById("ingame").style.display = "block"
 
                    editData.servers[lobbyIndex].players.push({
                        "id": playerId,
@@ -347,6 +352,9 @@ async function placeCard(code, id, index) {
 
 
                    updateCards(editData, lobbyCode, playerId)
+               } else {
+                  joinButton.innerHTML = "No lobby found"
+                  setTimeout(() => {joinButton.innerHTML = "Join"}, 2000)
                }
                return editData
            })
@@ -384,9 +392,9 @@ setInterval(async () => {
    <div id="lobbyActions">
      <input id="codeInp" placeholder="Enter lobby code here"></input>
      <input id="playerNameInp" placeholder="Enter your username here"></input>
-     <button onclick="addPlayer()">Join</button>
+     <button onclick="if (this.innerHTML == 'Join'){addPlayer()}" id="joinButton">Join</button>
    </div>
-   <div id="ingame">
+   <div id="ingame" style="display: none;">
       <label for="wildCardColor">What should the color for the wild card be?</label>
       <select id="wildCardColor" selected="red">
          <option value="red">Red</option>
