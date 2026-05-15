@@ -313,6 +313,7 @@ async function placeCard(code, id, index) {
 
         if (playedCard.symbol == "reverse"){
            editData.servers[lobbyInd].reverse = !editData.servers[lobbyInd].reverse
+           console.log(editData.servers[lobbyInd].reverse)
         }
         
         if (playedCard.symbol[0] == "+"){
