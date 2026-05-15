@@ -348,7 +348,7 @@ async function placeCard(code, id, index) {
                    editData.servers[lobbyIndex].nextPlayerId++
 
                    joinButton.innerHTML = "Lobby found"
-                   setTimeout(() => {document.getElementById("ingame").style.display = "block";document.getElementById("lobbyActions").style.display = "none"}, 2000)
+                   setTimeout(() => {document.getElementById("ingame").style.display = "block";document.getElementById("lobbyActions").style.display = "none"}, 1000)
 
       
 
@@ -362,7 +362,7 @@ async function placeCard(code, id, index) {
                    updateCards(editData, lobbyCode, playerId)
                } else {
                   joinButton.innerHTML = "No lobby found"
-                  setTimeout(() => {joinButton.innerHTML = "Join"}, 2000)
+                  setTimeout(() => {joinButton.innerHTML = "Join"}, 1000)
                }
                return editData
            })
