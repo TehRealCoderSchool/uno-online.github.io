@@ -367,6 +367,51 @@ async function placeCard(code, id, index) {
                return editData
            })
        }
+       async function createLobby(){
+          const codeInput = document.getElementById("codeInp").value
+           const playerNameInput = document.getElementById("playerNameInp").value
+           const joinButton = document.getElementById("joinButton")
+           joinButton.innerHTML = "Creating lobby..."
+           await updateResource(serverUrl, rawData => {
+               const data = rawData.record
+               let editData = data
+               if (getLobbyIndex(data, parseInt(codeInput)) == -1){
+                  lobbyCode = parseInt(codeInput)
+
+                  editData.servers.push({
+      "code": lobbyCode,
+      "players": [],
+      "middleCard": {
+        "color": ["red", "blue", "green", "yellow"][Math.floor(Math.random()*4)],
+        "symbol": String(Math.floor(Math.random()*10))
+      },
+      "nextPlayerId": 0,
+      "whoseTurnIsIt": 0,
+      "reverse": false,
+      "plusAmount": 0
+    })
+                  
+                  const lobbyIndex = getLobbyIndex(data, parseInt(codeInput))
+                  playerId = editData.servers[lobbyIndex].nextPlayerId
+                   editData.servers[lobbyIndex].nextPlayerId++
+
+                   joinButton.innerHTML = "Lobby created"
+                   setTimeout(() => {document.getElementById("ingame").style.display = "block";document.getElementById("lobbyActions").style.display = "none"}, 1000)
+
+      
+
+                   editData.servers[lobbyIndex].players.push({
+                       "id": playerId,
+                       "name": playerNameInput,
+                       "cards": generateStartingCardData()
+                   })
+
+
+                   updateCards(editData, lobbyCode, playerId)
+               }
+               return editData
+           })
+       }
 setInterval(async () => {
     const response = await fetch(serverUrl, {
         headers: { 'X-Master-Key': apiKey }
@@ -401,6 +446,7 @@ setInterval(async () => {
      <input id="codeInp" placeholder="Enter lobby code here"></input>
      <input id="playerNameInp" placeholder="Enter your username here"></input>
      <button onclick="if (this.innerHTML == 'Join'){addPlayer()}" id="joinButton">Join</button>
+     <button onclick="if (this.innerHTML == 'Create Lobby'){createLobby()}" id="joinButton">Create Lobby</button>
    </div>
    <div id="ingame" style="display: none;">
       <label for="wildCardColor">What should the color for the wild card be?</label>
