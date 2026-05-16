@@ -89,7 +89,7 @@
            top: 63px;
       }
       [data-symbol="reverse"] {
-           top: 30px;
+           top: 33px;
       }
    </style>
 </head>
@@ -326,6 +326,7 @@ async function placeCard(code, id, index) {
         } else {
            editData.servers[lobbyInd].whoseTurnIsIt++;
         }
+           editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
         }
         
         if (playedCard.symbol[0] == "+"){
