@@ -239,7 +239,7 @@
               newCard.setAttribute('onclick', `if (playableCards.includes(${i}) && isYourTurn){placeCard(lobbyCode, playerId, ${i})}`)
            }
            deck.replaceChildren(...newDeck)
-           dialog.innerHTML = "It is " + data.servers[lobbyInd].players[data.servers[lobbyInd].whoseTurnIsIt].name + " turn."
+           dialog.innerHTML = "It is " + data.servers[lobbyInd].players[data.servers[lobbyInd].whoseTurnIsIt].name + " turn" + (data.servers[lobbyInd].plusAmount > 0 ? ", and they are getting +" + data.servers[lobbyInd].plusAmount + "!" : ".")
        }
       function pickupCardData(data, code, id, howMany){
          const lobbyInd = getLobbyIndex(data, code);
