@@ -233,7 +233,7 @@
                newCard.dataset.cardType = "player"
                newCard.dataset.index = i
                newDeck.push(newCard)
-               if (newCard.dataset.color == data.servers[lobbyInd].middleCard.color || newCard.dataset.color == "black" || newCard.dataset.symbol == data.servers[lobbyInd].middleCard.symbol || (data.servers[lobbyInd].plusAmount > 0 && newCard.dataset.symbol[0] == "+")){
+               if ((data.servers[lobbyInd].plusAmount <= 0 && (newCard.dataset.color == data.servers[lobbyInd].middleCard.color || newCard.dataset.color == "black" || newCard.dataset.symbol == data.servers[lobbyInd].middleCard.symbol)) || (data.servers[lobbyInd].plusAmount > 0 && newCard.dataset.symbol[0] == "+")){
                    playableCards.push(i)
                }
               newCard.setAttribute('onclick', `if (playableCards.includes(${i}) && isYourTurn){placeCard(lobbyCode, playerId, ${i})}`)
