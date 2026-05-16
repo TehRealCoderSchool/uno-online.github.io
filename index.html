@@ -240,7 +240,7 @@
               newCard.setAttribute('onclick', `if (playableCards.includes(${i}) && isYourTurn){placeCard(lobbyCode, playerId, ${i})}`)
            }
            deck.replaceChildren(...newDeck)
-           if (playableCards.length <= 0){
+           if (playableCards.length <= 0 && isYourTurn){
               pickupDeck.style.border = "4px solid yellow"
            } else {
               pickupDeck.style.border = "2px solid black"
