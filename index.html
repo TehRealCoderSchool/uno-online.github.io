@@ -233,7 +233,7 @@
                newCard.dataset.cardType = "player"
                newCard.dataset.index = i
                newDeck.push(newCard)
-               if (newCard.dataset.color == data.servers[lobbyInd].middleCard.color || newCard.dataset.color == "black" || newCard.dataset.symbol == data.servers[lobbyInd].middleCard.symbol){
+               if (newCard.dataset.color == data.servers[lobbyInd].middleCard.color || newCard.dataset.color == "black" || newCard.dataset.symbol == data.servers[lobbyInd].middleCard.symbol || (data.servers[lobbyInd].plusAmount > 0 && newCard.dataset.symbol[0] == "+")){
                    playableCards.push(i)
                }
               newCard.setAttribute('onclick', `if (playableCards.includes(${i}) && isYourTurn){placeCard(lobbyCode, playerId, ${i})}`)
@@ -275,7 +275,7 @@ async function pickupCard(code, id, howMany){
 
             let editData = data;
 
-           for (let i = 0; i < howMany; i++) {
+           for (let i = 0; i < (editData.servers[lobbyInd].plusAmount > 0 ? editData.servers[lobbyInd].plusAmount : howMany); i++) {
                if (Math.random() <= .762) {
                    editData.servers[lobbyInd].players[playerInd].cards.push({
                        color: colors[Math.floor(Math.random() * colors.length)],
@@ -288,7 +288,7 @@ async function pickupCard(code, id, howMany){
                    })
                }
            }
-
+           editData.servers[lobbyInd].plusAmount = 0
             if (editData.servers[lobbyInd].reverse){
            editData.servers[lobbyInd].whoseTurnIsIt--;
         } else {
@@ -331,11 +331,11 @@ async function placeCard(code, id, index) {
         
         if (playedCard.symbol[0] == "+"){
            if (editData.servers[lobbyInd].reverse){
-              editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[(playerInd - 1) % editData.servers[lobbyInd].players.length].id, parseInt(playedCard.symbol.substring(1)))
-              editData.servers[lobbyInd].whoseTurnIsIt--;
+              //editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[(playerInd - 1) % editData.servers[lobbyInd].players.length].id, parseInt(playedCard.symbol.substring(1)))
+              editData.servers[lobbyInd].plusAmount += parseInt(playedCard.symbol.substring(1))
            } else {
-              editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[(playerInd + 1) % editData.servers[lobbyInd].players.length].id, parseInt(playedCard.symbol.substring(1)))
-              editData.servers[lobbyInd].whoseTurnIsIt++;
+              //editData = pickupCardData(editData, lobbyCode, editData.servers[lobbyInd].players[(playerInd + 1) % editData.servers[lobbyInd].players.length].id, parseInt(playedCard.symbol.substring(1)))
+              editData.servers[lobbyInd].plusAmount += parseInt(playedCard.symbol.substring(1))
            }
            editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
         }
