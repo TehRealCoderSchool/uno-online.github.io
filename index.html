@@ -446,7 +446,10 @@ async function placeCard(code, id, index) {
              const lobbyInd = getLobbyIndex(data, lobbyCode);
              const playerInd = getPlayerIndex(data, lobbyCode, playerId);
              let editData = data
-
+            let lobbyActions = document.getElementById("lobbyActions")
+           let inGame = document.getElementById("ingame")
+            ingame.style.display = "none"
+              lobbyActions.style.display = "block"
              editData.servers.splice(lobbyInd, 1)
             playerId = -1
             lobbyCode = -1
@@ -544,7 +547,7 @@ setInterval(async () => {
    </div>
    <div id="ingame" style="display: none;">
       <button onclick="if (this.innerHTML == 'Close Lobby'){closeLobby();this.innerHTML = 'Delete Lobby'} else if (this.innerHTML == 'Delete Lobby'){deleteLobby()}" id="dangerButton">Close Lobby</button>
-      <button id="playerLeave" ></button>
+      <button id="playerLeave" onclick="playerLeave()">Leave the game</button>
       <label for="wildCardColor">What should the color for the wild card be?</label>
       <select id="wildCardColor" selected="red">
          <option value="red">Red</option>
