@@ -208,6 +208,17 @@
            }
            return startingCards
        }
+      function getPlayerIdByName(data, code, name){
+         let lobIndex = getLobbyIndex(data, code)
+           if (lobIndex != -1) {
+               for (let i = 0; i < data.servers[lobIndex].players.length; i++) {
+                   if (data.servers[lobIndex].players[i].name == name) {
+                       return data.servers[lobIndex].players[i].id
+                   }
+               }
+           }
+           return -1
+      }
        function updateCards(data, code, id) {
            let lobbyInd = getLobbyIndex(data, code)
            let playerInd = getPlayerIndex(data, code, id)
@@ -216,8 +227,22 @@
            let middleCard = document.getElementById("middleCard")
            let pickupDeck = document.getElementById("pickupDeck")
            let dialog = document.getElementById("dialog")
+           let lobbyActions = document.getElementById("lobbyActions")
+           let inGame = document.getElementById("ingame")
+           let dangerButton = document.getElementById("dangerButton")
            let newDeck = []
 
+           if (playerInd == -1){
+              ingame.style.display = "none"
+              lobbyActions.style.display = "block"
+           } else {
+            ingame.style.display = "block"
+              lobbyActions.style.display = "none"
+           if (playerInd == 0){
+               dangerButton.style.display = "block"
+           } else {
+               dangerButton.style.display = "none"
+           }
            isYourTurn = (data.servers[lobbyInd].whoseTurnIsIt == playerInd)
            
            middleCard.dataset.color = data.servers[lobbyInd].middleCard.color
@@ -246,6 +271,7 @@
               pickupDeck.style.border = "2px solid black"
            }
            dialog.innerHTML = "It is " + data.servers[lobbyInd].players[data.servers[lobbyInd].whoseTurnIsIt].name + " turn" + (data.servers[lobbyInd].plusAmount > 0 ? ", and they are getting +" + data.servers[lobbyInd].plusAmount + "!" : ".")
+           }
        }
       function pickupCardData(data, code, id, howMany){
          const lobbyInd = getLobbyIndex(data, code);
@@ -368,23 +394,33 @@ async function placeCard(code, id, index) {
                const lobbyIndex = getLobbyIndex(data, parseInt(codeInput))
                let editData = data
                if (lobbyIndex != -1) {
-                   lobbyCode = parseInt(codeInput)
-                   playerId = editData.servers[lobbyIndex].nextPlayerId
-                   editData.servers[lobbyIndex].nextPlayerId++
+                   if (editData.servers[lobbyIndex].open){
+                      lobbyCode = parseInt(codeInput)
+                      if (getPlayerIdByName(editData, lobbyCode, playerNameInput) != -1){
+                         playerId = getPlayerIdByName(editData, lobbyCode, playerNameInput)
+                      } else {
+                         playerId = editData.servers[lobbyIndex].nextPlayerId
+                         editData.servers[lobbyIndex].nextPlayerId++
+                      }
 
                    joinButton.innerHTML = "Lobby found"
                    setTimeout(() => {document.getElementById("ingame").style.display = "block";document.getElementById("lobbyActions").style.display = "none"}, 1000)
 
       
-
-                   editData.servers[lobbyIndex].players.push({
+                   if (getPlayerIdByName(editData, lobbyCode, playerNameInput) == -1){
+                         editData.servers[lobbyIndex].players.push({
                        "id": playerId,
                        "name": playerNameInput,
                        "cards": generateStartingCardData()
                    })
+                   }
 
 
                    updateCards(editData, lobbyCode, playerId)
+                   } else {
+                     joinButton.innerHTML = "Lobby is closed"
+                     setTimeout(() => {joinButton.innerHTML = "Join"}, 1000)
+                   }
                } else {
                   joinButton.innerHTML = "No lobby found"
                   setTimeout(() => {joinButton.innerHTML = "Join"}, 1000)
@@ -392,10 +428,38 @@ async function placeCard(code, id, index) {
                return editData
            })
        }
+       async function closeLobby(){
+          await updateResource(serverUrl, rawData => {
+             const data = rawData.record;
+             const lobbyInd = getLobbyIndex(data, lobbyCode);
+             const playerInd = getPlayerIndex(data, lobbyCode, playerId);
+             let editData = data
+             if (lobbyInd != -1){
+                editData.servers[lobbyInd].open = false
+             }
+             return editData
+          })
+       }
+      async function deleteLobby(){
+         await updateResource(serverUrl, rawData => {
+             const data = rawData.record;
+             const lobbyInd = getLobbyIndex(data, lobbyCode);
+             const playerInd = getPlayerIndex(data, lobbyCode, playerId);
+             let editData = data
+
+             editData.servers.splice(lobbyInd, 1)
+            playerId = -1
+            lobbyCode = -1
+            isYourTurn = false
+            playableCards = []
+            updateCards(editData, lobbyCode, playerId)
+             return editData
+          })
+      }
        async function createLobby(){
           const codeInput = document.getElementById("codeInp").value
            const playerNameInput = document.getElementById("playerNameInp").value
-           const joinButton = document.getElementById("joinButton")
+           const joinButton = document.getElementById("lobbyButton")
            joinButton.innerHTML = "Creating lobby..."
            await updateResource(serverUrl, rawData => {
                const data = rawData.record
@@ -407,13 +471,14 @@ async function placeCard(code, id, index) {
       "code": lobbyCode,
       "players": [],
       "middleCard": {
-        "color": ["red", "blue", "green", "yellow"][Math.floor(Math.random()*4)],
+        "color": colors[Math.floor(Math.random()*colors.length)],
         "symbol": String(Math.floor(Math.random()*10))
       },
       "nextPlayerId": 0,
       "whoseTurnIsIt": 0,
       "reverse": false,
-      "plusAmount": 0
+      "plusAmount": 0,
+      "open": true
     })
                   
                   const lobbyIndex = getLobbyIndex(data, parseInt(codeInput))
@@ -433,9 +498,30 @@ async function placeCard(code, id, index) {
 
 
                    updateCards(editData, lobbyCode, playerId)
+               } else {
+                  joinButton.innerHTML = "Lobby with code already exists"
+                   setTimeout(() => {joinButton.innerHTML = "Create Lobby"}, 1000)
                }
                return editData
            })
+       }
+       async function playerLeave(){
+          await updateResource(serverUrl, rawData => {
+              const data = rawData.record
+              const playerIndex = getPlayerIndex(data, lobbyCode, playerId)
+              let editData = data
+              if (playerIndex != -1){
+                 const lobbyInd = getLobbyIndex(data, lobbyCode)
+                 editData.servers[lobbyInd].players.splice(playerIndex, 1)
+                 editData.servers.splice(lobbyInd, 1)
+            playerId = -1
+            lobbyCode = -1
+            isYourTurn = false
+            playableCards = []
+            updateCards(editData, lobbyCode, playerId)
+              }
+             return editData
+           }) 
        }
 setInterval(async () => {
     const response = await fetch(serverUrl, {
@@ -448,32 +534,17 @@ setInterval(async () => {
         updateCards(data.record, lobbyCode, playerId);
     }
 }, 3000); // Checks every 3 seconds
-      //  window.addEventListener('beforeunload', async (event) => {
-      //   event.preventDefault();
-      //   try {
-      //      await updateResource(serverUrl, rawData => {
-      //         const data = rawData.record
-      //         const playerIndex = getPlayerIndex(data, lobbyCode, playerId)
-      //         let editData = data
-      //         if (playerIndex != -1){
-      //            const lobbyInd = getLobbyIndex(data, lobbyCode)
-      //            editData.servers[lobbyInd].players.splice(playerIndex, 1)
-      //         }
-      //      }) 
-      //   } catch (error) {
-      //      console.error(error);
-      //   }
-      //   event.returnValue = ''; 
-      // });
 
    </script>
    <div id="lobbyActions">
      <input id="codeInp" placeholder="Enter lobby code here"></input>
      <input id="playerNameInp" placeholder="Enter your username here"></input>
      <button onclick="if (this.innerHTML == 'Join'){addPlayer()}" id="joinButton">Join</button>
-     <button onclick="if (this.innerHTML == 'Create Lobby'){createLobby()}" id="joinButton">Create Lobby</button>
+     <button onclick="if (this.innerHTML == 'Create Lobby'){createLobby()}" id="lobbyButton">Create Lobby</button>
    </div>
    <div id="ingame" style="display: none;">
+      <button onclick="if (this.innerHTML == 'Close Lobby'){closeLobby();this.innerHTML = 'Delete Lobby'} else if (this.innerHTML == 'Delete Lobby'){deleteLobby()}" id="dangerButton">Close Lobby</button>
+      <button id="playerLeave" ></button>
       <label for="wildCardColor">What should the color for the wild card be?</label>
       <select id="wildCardColor" selected="red">
          <option value="red">Red</option>
@@ -498,7 +569,7 @@ setInterval(async () => {
    <button class="card" data-color="red" data-cardType="middle" data-symbol="3" data-index="-1"
        id="middleCard">3</button>
    <button class="backCard" onclick="if (isYourTurn){pickupCard(lobbyCode, playerId, 1)}" id="pickupDeck"></button>
-   <dialog open id="dialog">It is ? turn.</dialog>
+   <dialog open id="dialog"></dialog>
    </div>
 </body>
 
