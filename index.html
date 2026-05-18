@@ -222,21 +222,19 @@
        function updateCards(data, code, id) {
            let lobbyInd = getLobbyIndex(data, code)
            let playerInd = getPlayerIndex(data, code, id)
-           let playerData = data.servers[lobbyInd].players[playerInd]
-           let deck = document.getElementById("playerDeck")
-           let middleCard = document.getElementById("middleCard")
-           let pickupDeck = document.getElementById("pickupDeck")
-           let dialog = document.getElementById("dialog")
-           let lobbyActions = document.getElementById("lobbyActions")
+          let lobbyActions = document.getElementById("lobbyActions")
            let inGame = document.getElementById("ingame")
            let dangerButton = document.getElementById("dangerButton")
-           let newDeck = []
-
-           console.log(playerInd)
            if (playerInd == -1){
               ingame.style.display = "none"
               lobbyActions.style.display = "block"
            } else {
+              let playerData = data.servers[lobbyInd].players[playerInd]
+           let deck = document.getElementById("playerDeck")
+           let middleCard = document.getElementById("middleCard")
+           let pickupDeck = document.getElementById("pickupDeck")
+           let dialog = document.getElementById("dialog")
+           let newDeck = []
             ingame.style.display = "block"
               lobbyActions.style.display = "none"
            if (playerInd == 0){
