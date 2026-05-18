@@ -327,11 +327,14 @@ async function pickupCard(code, id, howMany){
            }
            editData.servers[lobbyInd].plusAmount = 0
             if (editData.servers[lobbyInd].reverse){
-           editData.servers[lobbyInd].whoseTurnIsIt--;
-        } else {
-           editData.servers[lobbyInd].whoseTurnIsIt++;
-        }
-        editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
+   editData.servers[lobbyInd].whoseTurnIsIt--;
+} else {
+   editData.servers[lobbyInd].whoseTurnIsIt++;
+}
+
+// Fixed wrap-around calculation for negative numbers
+const totalPlayers = editData.servers[lobbyInd].players.length;
+editData.servers[lobbyInd].whoseTurnIsIt = (editData.servers[lobbyInd].whoseTurnIsIt % totalPlayers + totalPlayers) % totalPlayers;
             
             return editData;
          })
@@ -359,11 +362,14 @@ async function placeCard(code, id, index) {
 
         if (playedCard.symbol == "skip"){
            if (editData.servers[lobbyInd].reverse){
-           editData.servers[lobbyInd].whoseTurnIsIt--;
-        } else {
-           editData.servers[lobbyInd].whoseTurnIsIt++;
-        }
-           editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
+   editData.servers[lobbyInd].whoseTurnIsIt--;
+} else {
+   editData.servers[lobbyInd].whoseTurnIsIt++;
+}
+
+// Fixed wrap-around calculation for negative numbers
+const totalPlayers = editData.servers[lobbyInd].players.length;
+editData.servers[lobbyInd].whoseTurnIsIt = (editData.servers[lobbyInd].whoseTurnIsIt % totalPlayers + totalPlayers) % totalPlayers;
         }
         
         if (playedCard.symbol[0] == "+"){
@@ -378,11 +384,14 @@ async function placeCard(code, id, index) {
         }
         // Cycle turn
         if (editData.servers[lobbyInd].reverse){
-           editData.servers[lobbyInd].whoseTurnIsIt--;
-        } else {
-           editData.servers[lobbyInd].whoseTurnIsIt++;
-        }
-        editData.servers[lobbyInd].whoseTurnIsIt %= editData.servers[lobbyInd].players.length;
+   editData.servers[lobbyInd].whoseTurnIsIt--;
+} else {
+   editData.servers[lobbyInd].whoseTurnIsIt++;
+}
+
+// Fixed wrap-around calculation for negative numbers
+const totalPlayers = editData.servers[lobbyInd].players.length;
+editData.servers[lobbyInd].whoseTurnIsIt = (editData.servers[lobbyInd].whoseTurnIsIt % totalPlayers + totalPlayers) % totalPlayers;
 
         updateCards(editData, code, id)
        
