@@ -464,7 +464,12 @@ async function deleteLobby(){
 
       // Instantly flip UI containers back to login screen
       document.getElementById("ingame").style.display = "none";
-      document.getElementById("lobbyActions").style.display = "block";
+       document.getElementById("lobbyActions").style.display = "block";
+       document.getElementById("codeInp").value = "";
+       document.getElementById("playerNameInp").value = "";
+       document.getElementById("joinButton").innerHTML = "Join";
+       document.getElementById("lobbyButton").innerHTML = "Create Lobby";
+       document.getElementById("dangerButton").innerHTML = "Close Lobby";
 
       return editData;
    });
@@ -540,7 +545,11 @@ async function deleteLobby(){
        
        document.getElementById("ingame").style.display = "none";
        document.getElementById("lobbyActions").style.display = "block";
-
+       document.getElementById("codeInp").value = "";
+       document.getElementById("playerNameInp").value = "";
+       document.getElementById("joinButton").innerHTML = "Join";
+       document.getElementById("lobbyButton").innerHTML = "Create Lobby";
+       document.getElementById("dangerButton").innerHTML = "Close Lobby";
        return editData;
    }); 
 }
