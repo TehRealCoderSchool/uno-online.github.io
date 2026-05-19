@@ -91,6 +91,45 @@
       [data-symbol="reverse"] {
            top: 33px;
       }
+
+      .podium-list {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 20px;
+  list-style: none;
+  height: 300px;
+  padding: 0;
+  margin: 0;
+}
+
+.podium-list li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+}
+
+/* Height and Order of the Podium */
+.rank-1 {
+  height: 80%; /* Tallest for 1st place */
+  order: 2;    /* Centered */
+  background-color: #f1c40f !important; /* Gold */
+}
+
+.rank-2 {
+  height: 60%;
+  order: 1;
+}
+
+.rank-3 {
+  height: 40%;
+  order: 3;
+}
+
    </style>
 </head>
 
@@ -123,6 +162,8 @@
            "wild": "<img src='https://i.ibb.co/j9ZGhZwg/Screenshot-2026-04-10-1-42-31-PM-removebg-preview.png' width='90' style='position: relative; top:-6px; left: -4px;'></img>",
            "+4": "+4"
        }
+       let lastLobbyPlayed = -1
+      
        let playerId = -1
        let lobbyCode = -1
        let isYourTurn = false
@@ -275,7 +316,7 @@
            } else {
               pickupDeck.style.border = "2px solid black"
            }
-           dialog.innerHTML = "It is " + data.servers[lobbyInd].players[data.servers[lobbyInd].whoseTurnIsIt].name + " turn" + (data.servers[lobbyInd].plusAmount > 0 ? ", and they are getting +" + data.servers[lobbyInd].plusAmount + "!" : ".")
+           dialog.innerHTML = "It is " + data.servers[lobbyInd].players[data.servers[lobbyInd].whoseTurnIsIt].name + "'s turn" + (data.servers[lobbyInd].plusAmount > 0 ? ", and they are getting +" + data.servers[lobbyInd].plusAmount + "!" : ".")
            }
        }
       function pickupCardData(data, code, id, howMany){
@@ -393,6 +434,37 @@ editData.servers[lobbyInd].whoseTurnIsIt = (editData.servers[lobbyInd].whoseTurn
 const totalPlayers = editData.servers[lobbyInd].players.length;
 editData.servers[lobbyInd].whoseTurnIsIt = (editData.servers[lobbyInd].whoseTurnIsIt % totalPlayers + totalPlayers) % totalPlayers;
 
+       
+        if (editData.servers[lobbyInd].players[playerInd].cards.length <= 0){           
+            if (lobbyInd != -1){
+          const playerIndex = getPlayerIndex(data, lobbyCode, playerId);
+          if (playerInd != -1) {
+            
+             
+             // Remove ONLY the player from the array
+             editData.servers[lobbyInd].podium.push(editData.servers[lobbyInd].players.splice(playerInd, 1).name)
+             if (editData.servers[lobbyInd].players.length <= 0){
+                editData.servers.splice(lobbyInd, 1)
+             }
+          }
+       }
+       
+       // Reset client-side states and UI
+       lastLobbyPlayed = lobbyCode;
+       playerId = -1;
+       lobbyCode = -1;
+       isYourTurn = false;
+       playableCards = [];
+       
+       document.getElementById("ingame").style.display = "none";
+       document.getElementById("lobbyActions").style.display = "block";
+       document.getElementById("codeInp").value = "";
+       document.getElementById("playerNameInp").value = "";
+       document.getElementById("joinButton").innerHTML = "Join";
+       document.getElementById("lobbyButton").innerHTML = "Create Lobby";
+       document.getElementById("dangerButton").innerHTML = "Close Lobby";
+        }
+       
         updateCards(editData, code, id)
        
         return editData;
@@ -401,6 +473,7 @@ editData.servers[lobbyInd].whoseTurnIsIt = (editData.servers[lobbyInd].whoseTurn
        async function addPlayer() {
            const codeInput = document.getElementById("codeInp").value
            const playerNameInput = document.getElementById("playerNameInp").value
+          const passwordInput = document.getElementById("passwordInp").value
            const joinButton = document.getElementById("joinButton")
            joinButton.innerHTML = "Finding lobby..."
            await updateResource(serverUrl, rawData => {
@@ -408,7 +481,7 @@ editData.servers[lobbyInd].whoseTurnIsIt = (editData.servers[lobbyInd].whoseTurn
                const lobbyIndex = getLobbyIndex(data, parseInt(codeInput))
                let editData = data
                if (lobbyIndex != -1) {
-                   if (editData.servers[lobbyIndex].open){
+                   if (editData.servers[lobbyIndex].open || (getPlayerIdByName(editData, lobbyCode, playerNameInput) != -1 && passwordInput == editData.servers[lobbyIndex].players[getPlayerIndex(editData, parseInt(codeInput), getPlayerIdByName(editData, lobbyCode, playerNameInput))].password)){
                       lobbyCode = parseInt(codeInput)
                       if (getPlayerIdByName(editData, lobbyCode, playerNameInput) != -1){
                          playerId = getPlayerIdByName(editData, lobbyCode, playerNameInput)
@@ -425,6 +498,7 @@ editData.servers[lobbyInd].whoseTurnIsIt = (editData.servers[lobbyInd].whoseTurn
                          editData.servers[lobbyIndex].players.push({
                        "id": playerId,
                        "name": playerNameInput,
+                       "password": passwordInput,
                        "cards": generateStartingCardData()
                    })
                    }
@@ -505,7 +579,8 @@ async function deleteLobby(){
       "whoseTurnIsIt": 0,
       "reverse": false,
       "plusAmount": 0,
-      "open": true
+      "open": true,
+      "podium": []
     })
                   
                   const lobbyIndex = getLobbyIndex(data, parseInt(codeInput))
@@ -543,10 +618,14 @@ async function deleteLobby(){
           if (playerIndex != -1) {
              // Remove ONLY the player from the array
              editData.servers[lobbyInd].players.splice(playerIndex, 1);
+             if (editData.servers[lobbyInd].players.length <= 0){
+                editData.servers.splice(lobbyInd, 1)
+             }
           }
        }
        
        // Reset client-side states and UI
+       lastLobbyPlayed = lobbyCode;
        playerId = -1;
        lobbyCode = -1;
        isYourTurn = false;
@@ -562,6 +641,7 @@ async function deleteLobby(){
        return editData;
    }); 
 }
+let oldData = {}
 setInterval(async () => {
     const response = await fetch(serverUrl, {
         headers: { 'X-Master-Key': apiKey }
@@ -569,15 +649,47 @@ setInterval(async () => {
     const data = await response.json();
     // Only update if we are actually in a game
     console.log(data);
+    if (Object.keys(oldData).length != 0){
+       const difference = oldData.record.servers.filter(item => !data.record.servers.includes(item));
+       if (difference.length > 0){
+          for (let lobby of difference){
+             if (lobby.code == lastLobbyPlayed){
+                let podiumElem = document.getElementById("podium")
+                let newPodium = []
+                for (let i = 0; i < lobby.podium.legth; i++){
+                   let newPodiumObj = document.createElement("li")
+                   newPodiumObj.className = `rank-${i + 1}`
+                   newPodiumObj.innerHTML = lobby.podium[i]
+                   newPodium.push(newPodiumObj)
+                }
+                podiumElem.replaceChildren(...newPodium)
+
+                document.getElementById("podiumModal").showModal()
+                
+                lastLobbyPlayed = -1
+             }
+          }
+       }
+    }
+   
     if (lobbyCode !== -1) {
         updateCards(data.record, lobbyCode, playerId);
     }
+    oldData = data
 }, 3000); // Checks every 3 seconds
 
    </script>
+   <dialog id="podiumModal">
+      <h2>Here is who won in the last game you played</h2>
+      <ul class="podium-list" id="podium"></ul>
+      <form>
+         <button>Close</button>
+      </form>
+   </dialog>
    <div id="lobbyActions">
      <input id="codeInp" placeholder="Enter lobby code here"></input>
      <input id="playerNameInp" placeholder="Enter your username here"></input>
+     <input id="passwordInp" type="password" placeholder="Enter your password here"></input>
      <button onclick="if (this.innerHTML == 'Join'){addPlayer()}" id="joinButton">Join</button>
      <button onclick="if (this.innerHTML == 'Create Lobby'){createLobby()}" id="lobbyButton">Create Lobby</button>
    </div>
