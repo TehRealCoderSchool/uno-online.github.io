@@ -663,7 +663,7 @@ setInterval(async () => {
                    newPodium.push(newPodiumObj)
                 }
                 podiumElem.replaceChildren(...newPodium)
-
+               document.getElementById("title").innerHTML = lobby
                 document.getElementById("podiumModal").showModal()
                 
                 lastLobbyPlayed = -1
@@ -678,7 +678,7 @@ setInterval(async () => {
 
    </script>
    <dialog id="podiumModal">
-      <h2>Here is who won in the last game you played</h2>
+      <h2 id="title">Here is who won in the last game you played</h2>
       <ul class="podium-list" id="podium"></ul>
       <form>
          <button>Close</button>
