@@ -441,7 +441,7 @@ editData.servers[lobbyInd].whoseTurnIsIt = (editData.servers[lobbyInd].whoseTurn
           if (playerInd != -1) {
             
              
-             // Remove ONLY the player from the array
+             console.log(editData.servers[lobbyInd].players[playerInd].name)
              editData.servers[lobbyInd].podium.push(editData.servers[lobbyInd].players[playerInd].name)
              editData.servers[lobbyInd].players.splice(playerInd, 1)
              if (editData.servers[lobbyInd].players.length <= 0){
